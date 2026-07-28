@@ -4,7 +4,12 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     HF_HOME=/tmp/hf \
     FASTEMBED_CACHE_PATH=/tmp/fastembed \
-    TENANTQ_QDRANT_PATH=/tmp/tenantq_demo_qdrant
+    TENANTQ_QDRANT_PATH=/tmp/tenantq_demo_qdrant \
+    OMP_NUM_THREADS=1 \
+    OPENBLAS_NUM_THREADS=1 \
+    MKL_NUM_THREADS=1 \
+    TOKENIZERS_PARALLELISM=false \
+    TENANTQ_DEMO_DOCS_PER_TOPIC=6
 
 WORKDIR /app
 
