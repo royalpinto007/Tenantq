@@ -125,6 +125,15 @@ Brings up **Qdrant**, the **tenantq app** (runs a benchmark against the server
 then serves `/metrics` on `:8001`), and **Prometheus** (`:9090`) scraping both.
 `prometheus.yml` holds the scrape config. The app reads `QDRANT_URL=http://qdrant:6333`.
 
+## Kubernetes
+
+The same stack runs on Kubernetes. Manifests for the `tenantq` namespace (Qdrant
+`Deployment` + `Service` + `PersistentVolumeClaim`, the tenantq workload wired to
+the Qdrant `Service`, and Prometheus scraping it) live in [`k8s/`](k8s/), with a
+one-command `kind` walkthrough. Verified end to end: the workload ingests the
+corpus into the in-cluster Qdrant and Prometheus scrapes its recall/latency
+metrics.
+
 ## Metrics
 
 `prometheus_client` exposes on `/metrics`:

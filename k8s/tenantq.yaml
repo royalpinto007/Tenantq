@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tenantq
+  namespace: tenantq
+  labels:
+    app: tenantq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tenantq
+  template:
+    metadata:
+      labels:
+        app: tenantq
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8001"
+    spec:
+      containers:
+        - name: tenantq
+          image: tenantq:k8s
+          imagePullPolicy: IfNotPresent
+          env:
+            # Point the app at the in-cluster Qdrant Service.
+            - name: QDRANT_URL
+              value: "http://qdrant:6333"
+            # Offline hashing embedder: no model download, keeps the pod light.
+            - name: TENANTQ_EMBEDDER
+              value: "hash"
+            - name: TENANTQ_METRICS_PORT
+              value: "8001"
+          ports:
+            - name: metrics
+              containerPort: 8001
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /metrics
+              port: metrics
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tenantq
+  namespace: tenantq
+  labels:
+    app: tenantq
+spec:
+  selector:
+    app: tenantq
+  ports:
+    - name: metrics
+      port: 8001
+      targetPort: metrics
