@@ -35,6 +35,18 @@ class IngestReport:
     throughput: float
 
 
+def _is_local(client: QdrantClient) -> bool:
+    """True for an in-memory or on-disk local client.
+
+    The local (embedded) backend is not safe for concurrent upserts: two threads
+    writing at once can leave its internal id and vector arrays out of sync, which
+    later surfaces as a shape-mismatch during search. A real Qdrant server handles
+    concurrent upserts fine, so we only serialize writes for the local backend.
+    """
+    inner = getattr(client, "_client", None)
+    return inner is not None and inner.__class__.__name__ == "QdrantLocal"
+
+
 def _build_points(
     docs: Sequence[Document],
     dense: List[List[float]],
@@ -88,7 +100,7 @@ def ingest_documents(
         return len(batch)
 
     total = 0
-    if parallelism > 1 and len(batches) > 1:
+    if parallelism > 1 and len(batches) > 1 and not _is_local(client):
         with ThreadPoolExecutor(max_workers=parallelism) as pool:
             for n in pool.map(_work, batches):
                 total += n
