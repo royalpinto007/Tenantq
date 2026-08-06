@@ -10,7 +10,7 @@ pinned: false
 
 # tenantq demo
 
-A small, self-contained web demo of [**tenantq**](https://github.com/royalpinto007/tenantq),
+A small, self-contained web demo of [**tenantq**](https://github.com/AgentPostmortem/tenantq),
 a multi-tenant hybrid-search reference deployment on Qdrant.
 
 Several tenants' documents live in a single Qdrant collection, but every query is
@@ -42,4 +42,4 @@ docker run -p 7860:7860 tenantq-demo
 - `POST /search` — `{"tenant","query","mode","k"}` → `{"results":[{"content","score","category"}],"latency_ms","mode"}`.
 - `GET /health` — readiness probe.
 
-Source: [github.com/royalpinto007/tenantq](https://github.com/royalpinto007/tenantq)
+Source: [github.com/AgentPostmortem/tenantq](https://github.com/AgentPostmortem/tenantq)

@@ -195,7 +195,7 @@ PAGE = """<!doctype html>
     Multi-tenant hybrid search on Qdrant. Documents for several tenants live in one
     collection, but every query is strictly tenant-isolated: an agent for tenant A can
     never see tenant B's data. Source:
-    <a href="https://github.com/royalpinto007/tenantq" target="_blank" rel="noopener">github.com/royalpinto007/tenantq</a>.
+    <a href="https://github.com/AgentPostmortem/tenantq" target="_blank" rel="noopener">github.com/AgentPostmortem/tenantq</a>.
   </p>
 
   <div class="card">

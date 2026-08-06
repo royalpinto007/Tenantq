@@ -25,7 +25,7 @@ dev = ["pytest>=7.4", "ruff>=0.5"]
 tenantq = "tenantq.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/royalpinto007/tenantq"
+Homepage = "https://github.com/AgentPostmortem/tenantq"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/tenantq"]
