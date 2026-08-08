@@ -51,6 +51,22 @@ built via `payload_m`. Every single query carries a mandatory `Filter` on
 that proves it). This is Qdrant's recommended multitenant layout: cheaper than a
 collection-per-tenant and strictly isolated.
 
+**Enforced isolation (copy this).** Isolation used to depend on every call site
+remembering `build_filter(tenant_id, ...)`. That is easy to forget on a new code
+path, and the failure is silent. tenantq now routes all search reads through
+`TenantScopedClient` (`src/tenantq/scoped_client.py`):
+
+1. `tenant_id` is a **required** keyword argument on `query_points` / `scroll` /
+   `retrieve`.
+2. The wrapper **always** injects a `tenant_id` match into the filter (and into
+   every hybrid `Prefetch` branch). A raw filter cannot drop the tenant scope.
+3. A CI test (`tests/test_scoped_access.py`) fails if package code calls
+   `.query_points(`, `.scroll(`, or `.retrieve(` outside that wrapper.
+
+`search()` behaviour is unchanged for callers; only the enforcement mechanism is
+new. If you adapt this layout, copy the wrapper + the grep-style guard — not just
+the filter helper.
+
 **Hybrid retrieval.** Dense vectors come from `fastembed`
 (`sentence-transformers/all-MiniLM-L6-v2`), sparse from fastembed's
 `SparseTextEmbedding` (`Qdrant/bm25`, IDF modifier). Hybrid search uses the Qdrant
