@@ -13,6 +13,8 @@ from typing import List, Literal, Optional, Sequence
 
 from qdrant_client import QdrantClient, models
 
+from .scoped_client import TenantScopedClient
+
 from .config import (
     CATEGORY_FIELD,
     CREATED_AT_FIELD,
@@ -90,14 +92,23 @@ def search(
     created_before: Optional[int] = None,
     prefetch_limit: int = 50,
 ) -> List[SearchHit]:
-    """Run a tenant-isolated search in the requested retrieval mode."""
+    """Run a tenant-isolated search in the requested retrieval mode.
+
+    All Qdrant reads go through :class:`TenantScopedClient`, which requires
+    ``tenant_id`` and injects the tenant filter so a missing filter cannot
+    silently cross tenants.
+    """
     qfilter = build_filter(tenant_id, category, created_after, created_before)
+    # build_filter already includes tenant_id; scoped client re-injects it as a
+    # second hard guarantee (duplicate must-conditions are fine for MatchValue).
+    scoped = TenantScopedClient(client)
     params = models.SearchParams(hnsw_ef=settings.hnsw.hnsw_ef)
 
     start = time.perf_counter()
     if mode == "dense":
         dense_vec = embedder.embed_dense([query])[0]
-        res = client.query_points(
+        res = scoped.query_points(
+            tenant_id=tenant_id,
             collection_name=settings.collection,
             query=dense_vec,
             using=DENSE_VECTOR_NAME,
@@ -108,7 +119,8 @@ def search(
         )
     elif mode == "sparse":
         sv = embedder.embed_sparse([query])[0]
-        res = client.query_points(
+        res = scoped.query_points(
+            tenant_id=tenant_id,
             collection_name=settings.collection,
             query=models.SparseVector(indices=sv.indices, values=sv.values),
             using=SPARSE_VECTOR_NAME,
@@ -119,7 +131,8 @@ def search(
     elif mode == "hybrid":
         dense_vec = embedder.embed_dense([query])[0]
         sv = embedder.embed_sparse([query])[0]
-        res = client.query_points(
+        res = scoped.query_points(
+            tenant_id=tenant_id,
             collection_name=settings.collection,
             prefetch=[
                 models.Prefetch(
