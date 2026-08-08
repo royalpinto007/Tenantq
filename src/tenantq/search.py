@@ -13,8 +13,6 @@ from typing import List, Literal, Optional, Sequence
 
 from qdrant_client import QdrantClient, models
 
-from .scoped_client import TenantScopedClient
-
 from .config import (
     CATEGORY_FIELD,
     CREATED_AT_FIELD,
@@ -26,6 +24,7 @@ from .config import (
 )
 from .embeddings import Embedder
 from .metrics import QUERY_LATENCY
+from .scoped_client import TenantScopedClient
 
 Mode = Literal["dense", "sparse", "hybrid"]
 
