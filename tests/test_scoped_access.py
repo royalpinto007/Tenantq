@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import ast
 import re
 from pathlib import Path
 
@@ -79,7 +78,6 @@ def test_with_tenant_requires_non_empty():
 
 
 def test_with_tenant_injects_condition():
-    from qdrant_client import models
     from tenantq.config import TENANT_FIELD
 
     f = _with_tenant("acme", None)
